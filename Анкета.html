@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анкета</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        input[type="text"],
+        input[type="password"],
+        input[type="date"],
+        input[type="email"],
+        input[type="tel"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 5px rgba(74, 144, 226, 0.3);
+        }
+        .error {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        .buttons {
+            margin-top: 30px;
+            text-align: center;
+        }
+        button {
+            padding: 12px 24px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button[type="submit"] {
+            background-color: #2ecc71;
+            color: white;
+        }
+        button[type="reset"] {
+            background-color: #e74c3c;
+            color: white;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        #otherEducationField {
+            display: none;
+            margin-top: 10px;
+        }
+        .required-field::after {
+            content: "*";
+            color: #e74c3c;
+            margin-left: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1 style="text-align: center; color: #2c3e50; margin-bottom: 30px;">Анкета</h1>
+        <form id="userForm" method="GET" action="" novalidate>
+            <div class="form-group">
+                <label for="lastName" class="required-field">Фамилия:</label>
+                <input type="text" id="lastName" name="lastName" required>
+                <div class="error" id="lastNameError">Пожалуйста, используйте только буквы (максимум 50 символов)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="firstName" class="required-field">Имя:</label>
+                <input type="text" id="firstName" name="firstName" required>
+                <div class="error" id="firstNameError">Пожалуйста, используйте только буквы (максимум 50 символов)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="middleName">Отчество:</label>
+                <input type="text" id="middleName" name="middleName">
+                <div class="error" id="middleNameError">Пожалуйста, используйте только буквы (максимум 50 символов)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="required-field">Пароль:</label>
+                <input type="password" id="password" name="password" required>
+                <div class="error" id="passwordError">Максимальная длина пароля - 30 символов</div>
+            </div>
+
+            <div class="form-group">
+                <label for="birthDate" class="required-field">Дата рождения:</label>
+                <input type="date" id="birthDate" name="birthDate" required>
+                <div class="error" id="birthDateError">Дата рождения введена неверно</div>
+            </div>
+
+            <div class="form-group">
+                <label for="phone" class="required-field">Мобильный телефон:</label>
+                <input type="tel" id="phone" name="phone" placeholder="+7" required>
+                <div class="error" id="phoneError">Введите корректный номер телефона (максимум 14 символов)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="education" class="required-field">Образование:</label>
+                <select id="education" name="education" required>
+                    <option value="">Выберите образование</option>
+                    <option value="secondary">Среднее</option>
+                    <option value="higher">Высшее</option>
+                    <option value="other">Другое</option>
+                </select>
+                <input type="text" id="otherEducationField" name="otherEducation" placeholder="Укажите ваше образование">
+                <div class="error" id="otherEducationError">Максимальная длина - 100 символов</div>
+            </div>
+
+            <div class="form-group">
+                <label for="aboutMe">Немного о себе:</label>
+                <textarea id="aboutMe" name="aboutMe" rows="5"></textarea>
+                <div class="error" id="aboutMeError">Максимальная длина - 1000 символов</div>
+            </div>
+
+            <div class="buttons">
+                <button type="reset">Очистить</button>
+                <button type="submit">Отправить</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('userForm');
+            const education = document.getElementById('education');
+            const otherEducationField = document.getElementById('otherEducationField');
+            
+            // Set max date to today for birthDate
+            const birthDate = document.getElementById('birthDate');
+            const today = new Date();
+            const maxDate = today.toISOString().split('T')[0];
+            birthDate.max = maxDate;
+
+            // Birth date validation function
+            function validateBirthDate(input) {
+                const selectedDate = new Date(input.value);
+                const error = document.getElementById('birthDateError');
+                const isValid = !isNaN(selectedDate) && selectedDate <= today;
+                error.style.display = !isValid || !input.value ? 'block' : 'none';
+                return isValid && input.value;
+            }
+
+            // Name validation function
+            function validateName(input, errorElement) {
+                const value = input.value.trim();
+                const isValid = /^[а-яА-ЯёЁa-zA-Z\s-]{0,50}$/.test(value);
+                const showError = (!isValid && value) || (input.required && !value);
+                errorElement.style.display = showError ? 'block' : 'none';
+                return isValid && (!input.required || value);
+            }
+
+            // Phone validation function
+            function validatePhone(input) {
+                const value = input.value.trim();
+                const error = document.getElementById('phoneError');
+                const isValid = /^\+?\d{0,13}$/.test(value) && value.length <= 14 && value.length > 0;
+                error.style.display = !isValid ? 'block' : 'none';
+                return isValid;
+            }
+
+            // Other education field validation
+            function validateOtherEducation(input) {
+                const value = input.value.trim();
+                const error = document.getElementById('otherEducationError');
+                const isValid = value.length <= 100 && value.length > 0;
+                const showError = (!isValid && value) || (input.required && !value);
+                error.style.display = showError ? 'block' : 'none';
+                return isValid && (!input.required || value);
+            }
+
+            // About me validation
+            function validateAboutMe(input) {
+                const value = input.value.trim();
+                const error = document.getElementById('aboutMeError');
+                const isValid = value.length <= 1000;
+                error.style.display = !isValid ? 'block' : 'none';
+                return isValid;
+            }
+
+            // Password validation
+            function validatePassword(input) {
+                const value = input.value;
+                const error = document.getElementById('passwordError');
+                const isValid = value.length <= 30 && value.length > 0;
+                error.style.display = !isValid ? 'block' : 'none';
+                return isValid;
+            }
+
+            // Education validation
+            function validateEducation() {
+                const value = education.value;
+                const isValid = value !== "";
+                if (value === 'other') {
+                    return validateOtherEducation(otherEducationField);
+                }
+                return isValid;
+            }
+
+            // Add input event listeners
+            ['lastName', 'firstName', 'middleName'].forEach(id => {
+                const input = document.getElementById(id);
+                const error = document.getElementById(id + 'Error');
+                input.addEventListener('input', () => validateName(input, error));
+            });
+
+            document.getElementById('phone').addEventListener('input', function(e) {
+                if (!validatePhone(this)) {
+                    e.preventDefault();
+                    this.value = this.value.slice(0, -1);
+                }
+            });
+
+            document.getElementById('password').addEventListener('input', function() {
+                validatePassword(this);
+            });
+
+            document.getElementById('birthDate').addEventListener('input', function() {
+                validateBirthDate(this);
+            });
+
+            document.getElementById('aboutMe').addEventListener('input', function() {
+                validateAboutMe(this);
+            });
+
+            // Handle education select change
+            education.addEventListener('change', function() {
+                otherEducationField.style.display = this.value === 'other' ? 'block' : 'none';
+                if (this.value === 'other') {
+                    otherEducationField.required = true;
+                } else {
+                    otherEducationField.required = false;
+                    otherEducationField.value = '';
+                }
+                validateEducation();
+            });
+
+            otherEducationField.addEventListener('input', function() {
+                validateOtherEducation(this);
+            });
+
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // Validate all fields
+                let isValid = true;
+
+                // Validate names
+                ['lastName', 'firstName', 'middleName'].forEach(id => {
+                    const input = document.getElementById(id);
+                    const error = document.getElementById(id + 'Error');
+                    if (!validateName(input, error)) {
+                        isValid = false;
+                    }
+                });
+
+                // Validate required fields
+                if (!validatePhone(document.getElementById('phone'))) {
+                    isValid = false;
+                }
+
+                if (!validatePassword(document.getElementById('password'))) {
+                    isValid = false;
+                }
+
+                if (!validateBirthDate(birthDate)) {
+                    isValid = false;
+                }
+
+                if (!validateEducation()) {
+                    isValid = false;
+                }
+
+                if (!validateAboutMe(document.getElementById('aboutMe'))) {
+                    isValid = false;
+                }
+
+                if (isValid) {
+                    // Submit the form using GET method
+                    const formData = new FormData(form);
+                    const params = new URLSearchParams(formData);
+                    window.location.href = window.location.pathname + '?' + params.toString();
+                } else {
+                    alert('Пожалуйста, проверьте правильность заполнения всех обязательных полей.');
+                }
+            });
+
+            // Reset form
+            form.addEventListener('reset', function() {
+                setTimeout(() => {
+                    document.querySelectorAll('.error').forEach(error => {
+                        error.style.display = 'none';
+                    });
+                    otherEducationField.style.display = 'none';
+                    otherEducationField.required = false;
+                }, 0);
+            });
+        });
+    </script>
+</body>
+</html>
